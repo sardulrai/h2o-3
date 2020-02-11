@@ -454,7 +454,7 @@ public class LinearAlgebraUtils {
     @Override public void map(Chunk[] cs) {
       assert cs.length == _ncolX + _yt.length;
       // Copy over only X frame chunks
-      Chunk[] xchk = new Chunk[_ncolX];
+      Chunk[] xchk = new Chunk[_ncolX]; // only refer to X part, old part of frame
       DataInfo.Row xrow = _xinfo.newDenseRow();
       System.arraycopy(cs,0,xchk,0,_ncolX);
       double sum;
@@ -466,7 +466,7 @@ public class LinearAlgebraUtils {
         for (double[] ps : _yt ) {
           // Inner product of X row with Y column (Y' row)
           sum = xrow.innerProduct(ps);
-          cs[bidx].set(row, sum);   // Save inner product to B
+          cs[bidx].set(row, sum);   // Save inner product to B, new part of frame
           bidx++;
         }
         assert bidx == cs.length;

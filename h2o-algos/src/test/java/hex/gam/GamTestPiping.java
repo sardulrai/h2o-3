@@ -57,7 +57,7 @@ public class GamTestPiping extends TestUtil {
       parms._bs = new BSType[]{BSType.cr};
       parms._k = new int[]{6};
       parms._response_column = train.name(2);
-      parms._ignored_columns = new String[]{train.name(0)}; // row of ids
+      parms._ignored_columns = new String[]{train.name(0), train.name(1)}; // row of ids
       parms._gam_X = new String[]{train.name(1)};
       parms._train = train._key;
       parms._family = GLMModel.GLMParameters.Family.gaussian;
@@ -69,4 +69,30 @@ public class GamTestPiping extends TestUtil {
       Scope.exit();
     }
   }
+
+  @Test
+  public void testAdaptFrame2GAMColumns() {
+    try {
+      Scope.enter();
+      Frame train = parse_test_file("./smalldata/gam_test/gamDataRegressionTwoFuns.csv");
+      Scope.track(train);
+      GAMModel.GAMParameters parms = new GAMModel.GAMParameters();
+      parms._bs = new BSType[]{BSType.cr, BSType.cr};
+      parms._k = new int[]{6,6};
+      parms._response_column = train.name(3);
+      parms._ignored_columns = new String[]{train.name(0), train.name(1), train.name(2)}; // row of ids
+      parms._gam_X = new String[]{train.name(1), train.name(2)};
+      parms._train = train._key;
+      parms._family = GLMModel.GLMParameters.Family.gaussian;
+      parms._link = GLMModel.GLMParameters.Link.family_default;
+      parms._saveZMatrix = true;
+      parms._saveGamCols = true;
+
+      GAMModel model = new GAM(parms).trainModel().get();
+      Scope.track_generic(model);
+    } finally {
+      Scope.exit();
+    }
+  }
+
 }

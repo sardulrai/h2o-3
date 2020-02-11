@@ -72,7 +72,9 @@ public class GAMV3 extends ModelBuilderSchema<GAM, GAMV3, GAMV3.GAMParametersV3>
             "k",  // array: number of knots for each predictor
             "gam_X",  // array: predictor column names array
             "bs", // array, name of basis functions used
-            "scale" // array, smoothing parameter for GAM
+            "scale", // array, smoothing parameter for GAM,
+            "saveZMatrix",
+            "saveGamCols"
     };
 
     @API(help = "Seed for pseudo random number generator (if applicable)", gridable = true)

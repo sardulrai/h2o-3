@@ -3094,7 +3094,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
     }
   }
 
-  static class PlugValuesImputer implements DataInfo.Imputer {
+  public static class PlugValuesImputer implements DataInfo.Imputer { // make public to allow access to other algos
     private final Frame _plug_vals;
 
     public PlugValuesImputer(Frame plugValues) {

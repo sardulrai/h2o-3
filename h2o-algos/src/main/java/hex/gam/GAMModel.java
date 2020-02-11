@@ -8,6 +8,9 @@ import hex.glm.GLMModel.GLMParameters.Solver;
 import water.Key;
 import water.fvec.Frame;
 import water.util.Log;
+import hex.deeplearning.DeepLearningModel;
+import hex.glm.GLM;
+
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -42,6 +45,8 @@ public class GAMModel extends Model<GAMModel, GAMModel.GAMParameters, GAMModel.G
   public static class GAMParameters extends Model.Parameters {
     // the following parameters will be passed to GLM algos
     public boolean _standardize = false; // pass to GLM algo
+    public boolean _saveZMatrix = false;  // if asserted will save Z matrix
+    public boolean _saveGamCols = false;  // if true will save the keys to gam Columns only
     public Family _family;
     public Link _link; 
     public Solver _solver = Solver.AUTO;
@@ -90,6 +95,31 @@ public class GAMModel extends Model<GAMModel, GAMModel.GAMParameters, GAMModel.G
       MeanImputation, PlugValues, Skip
     }
 
+    public MissingValuesHandling missingValuesHandling() {
+      if (_missing_values_handling instanceof MissingValuesHandling)
+        return (MissingValuesHandling) _missing_values_handling;
+      assert _missing_values_handling instanceof DeepLearningModel.DeepLearningParameters.MissingValuesHandling;
+      switch ((DeepLearningModel.DeepLearningParameters.MissingValuesHandling) _missing_values_handling) {
+        case MeanImputation:
+          return MissingValuesHandling.MeanImputation;
+        case Skip:
+          return MissingValuesHandling.Skip;
+        default:
+          throw new IllegalStateException("Unsupported missing values handling value: " + _missing_values_handling);
+      }
+    }
+
+    public DataInfo.Imputer makeImputer() {
+      if (missingValuesHandling() == MissingValuesHandling.PlugValues) {
+        if (_plug_values == null || _plug_values.get() == null) {
+          throw new IllegalStateException("Plug values frame needs to be specified when Missing Value Handling = PlugValues.");
+        }
+        return new GLM.PlugValuesImputer(_plug_values.get());
+      } else { // mean/mode imputation and skip (even skip needs an imputer right now! PUBDEV-6809)
+        return new DataInfo.MeanImputer();
+      }
+    }
+
     @Override
     public long progressUnits() {
       return 1;
@@ -111,6 +141,8 @@ public class GAMModel extends Model<GAMModel, GAMModel.GAMParameters, GAMModel.G
     private double[] _zvalues;
     private double _dispersion;
     private boolean _dispersionEstimated;
+    public double[][][] _zTranspose; // Z matrix for de-centralization, can be null
+    public Key<Frame>[] _gamX;  // contain key of each gam column, for debugging purpose only
 
     public double dispersion(){ return _dispersion;}
     
